@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
-<link rel="stylesheet" href="style-1.css">
+<link rel="stylesheet" href="style-2.css">
 </head>
 <body>
 
@@ -48,15 +48,15 @@
       </label>
     </div>
     <button id="saveSettings" class="btn-primary">Save Settings</button>
-    <p class="hint">Grading scale used: Ghana BECE/JHS 9-point scale (Grade 1 Highest – Grade 9 Lowest).</p>
+    <p class="hint">Grading scale used: Ghana BECE/JHS 9-point scale (Grade 1 Highest – Grade 9 Lowest). The school name only appears on report cards after you tap Save Settings.</p>
   </section>
 
   <!-- CLASSES -->
   <section id="view-classes" class="view hidden">
     <h2>Classes</h2>
-    <div class="row">
+    <div class="stack">
       <input type="text" id="newClassName" placeholder="e.g. JHS 2A">
-      <button id="addClassBtn" class="btn-primary">Add</button>
+      <button id="addClassBtn" class="btn-primary">Add Class</button>
     </div>
     <ul id="classList" class="list"></ul>
   </section>
@@ -67,13 +67,13 @@
     <label>Class
       <select id="studentClassSelect"></select>
     </label>
-    <div class="row">
+    <div class="stack">
       <input type="text" id="newStudentName" placeholder="Full name">
       <select id="newStudentGender">
-        <option value="M">M</option>
-        <option value="F">F</option>
+        <option value="M">Male</option>
+        <option value="F">Female</option>
       </select>
-      <button id="addStudentBtn" class="btn-primary">Add</button>
+      <button id="addStudentBtn" class="btn-primary">Add Student</button>
     </div>
     <ul id="studentList" class="list"></ul>
   </section>
@@ -81,9 +81,9 @@
   <!-- SUBJECTS -->
   <section id="view-subjects" class="view hidden">
     <h2>Subjects</h2>
-    <div class="row">
+    <div class="stack">
       <input type="text" id="newSubjectName" placeholder="e.g. Mathematics">
-      <button id="addSubjectBtn" class="btn-primary">Add</button>
+      <button id="addSubjectBtn" class="btn-primary">Add Subject</button>
     </div>
     <ul id="subjectList" class="list"></ul>
     <p class="hint">Leave a score blank for a subject a student does not take — it will be skipped on their report.</p>
@@ -97,6 +97,7 @@
     </label>
     <div id="gradesTableWrap"></div>
     <button id="saveGradesBtn" class="btn-primary">Save Grades</button>
+    <p class="hint">Scores are capped automatically at 0–100 as you type.</p>
   </section>
 
   <!-- REPORTS -->
@@ -123,6 +124,6 @@
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app-1.js"></script>
+<script src="app-2.js"></script>
 </body>
 </html>
