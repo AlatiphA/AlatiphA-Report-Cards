@@ -1,0 +1,48 @@
+// AlatiphA Report Cards — service worker
+// Keep CACHE_NAME's version in sync with APP_VERSION in app-1.js
+const CACHE_NAME = 'arc-cache-v1';
+
+const APP_SHELL = [
+  './',
+  './index.html',
+  './style-1.css',
+  './app-1.js',
+  './manifest.json',
+  './icon.svg',
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return Promise.all(
+        APP_SHELL.map(url =>
+          fetch(url, { mode: url.startsWith('http') ? 'no-cors' : 'same-origin' })
+            .then(res => cache.put(url, res))
+            .catch(() => {})
+        )
+      );
+    }).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
+        return res;
+      }).catch(() => cached);
+    })
+  );
+});

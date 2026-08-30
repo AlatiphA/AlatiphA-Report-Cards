@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>AlatiphA Report Cards</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="style-1.css">
+</head>
+<body>
+
+<header class="topbar">
+  <span class="brand">AlatiphA Report Cards</span>
+  <span class="term-badge" id="termBadge">—</span>
+</header>
+
+<main id="app">
+
+  <!-- SETUP -->
+  <section id="view-setup" class="view">
+    <h2>School Setup</h2>
+    <label>School Name
+      <input type="text" id="schoolName" placeholder="e.g. St. Mary's JHS">
+    </label>
+    <label>Address / Contact
+      <input type="text" id="schoolAddress" placeholder="e.g. P.O. Box 1, Accra">
+    </label>
+    <label>School Logo
+      <input type="file" id="schoolLogo" accept="image/*">
+    </label>
+    <div id="logoPreviewWrap" class="hidden">
+      <img id="logoPreview" alt="Logo preview">
+      <button type="button" id="removeLogo" class="btn-text">Remove logo</button>
+    </div>
+    <div class="row">
+      <label>Term
+        <select id="currentTerm">
+          <option value="Term 1">Term 1</option>
+          <option value="Term 2">Term 2</option>
+          <option value="Term 3">Term 3</option>
+        </select>
+      </label>
+      <label>Academic Year
+        <input type="text" id="currentYear" placeholder="e.g. 2025/2026">
+      </label>
+    </div>
+    <button id="saveSettings" class="btn-primary">Save Settings</button>
+    <p class="hint">Grading scale used: Ghana BECE/JHS 9-point scale (Grade 1 Highest – Grade 9 Lowest).</p>
+  </section>
+
+  <!-- CLASSES -->
+  <section id="view-classes" class="view hidden">
+    <h2>Classes</h2>
+    <div class="row">
+      <input type="text" id="newClassName" placeholder="e.g. JHS 2A">
+      <button id="addClassBtn" class="btn-primary">Add</button>
+    </div>
+    <ul id="classList" class="list"></ul>
+  </section>
+
+  <!-- STUDENTS -->
+  <section id="view-students" class="view hidden">
+    <h2>Students</h2>
+    <label>Class
+      <select id="studentClassSelect"></select>
+    </label>
+    <div class="row">
+      <input type="text" id="newStudentName" placeholder="Full name">
+      <select id="newStudentGender">
+        <option value="M">M</option>
+        <option value="F">F</option>
+      </select>
+      <button id="addStudentBtn" class="btn-primary">Add</button>
+    </div>
+    <ul id="studentList" class="list"></ul>
+  </section>
+
+  <!-- SUBJECTS -->
+  <section id="view-subjects" class="view hidden">
+    <h2>Subjects</h2>
+    <div class="row">
+      <input type="text" id="newSubjectName" placeholder="e.g. Mathematics">
+      <button id="addSubjectBtn" class="btn-primary">Add</button>
+    </div>
+    <ul id="subjectList" class="list"></ul>
+    <p class="hint">Leave a score blank for a subject a student does not take — it will be skipped on their report.</p>
+  </section>
+
+  <!-- GRADES -->
+  <section id="view-grades" class="view hidden">
+    <h2>Grade Entry</h2>
+    <label>Class
+      <select id="gradesClassSelect"></select>
+    </label>
+    <div id="gradesTableWrap"></div>
+    <button id="saveGradesBtn" class="btn-primary">Save Grades</button>
+  </section>
+
+  <!-- REPORTS -->
+  <section id="view-reports" class="view hidden">
+    <h2>Reports</h2>
+    <label>Class
+      <select id="reportsClassSelect"></select>
+    </label>
+    <div class="row">
+      <button id="generateAllBtn" class="btn-primary">Generate Class Batch PDF</button>
+    </div>
+    <ul id="reportsStudentList" class="list"></ul>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button data-view="setup" class="tab-btn active">Setup</button>
+  <button data-view="classes" class="tab-btn">Classes</button>
+  <button data-view="students" class="tab-btn">Students</button>
+  <button data-view="subjects" class="tab-btn">Subjects</button>
+  <button data-view="grades" class="tab-btn">Grades</button>
+  <button data-view="reports" class="tab-btn">Reports</button>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app-1.js"></script>
+</body>
+</html>
