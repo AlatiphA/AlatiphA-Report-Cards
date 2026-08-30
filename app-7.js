@@ -1,0 +1,809 @@
+// AlatiphA Report Cards — app-7.js
+const APP_VERSION = 'v7';
+
+/* ---------- storage helpers ---------- */
+const DB = {
+  get(key, fallback) {
+    try {
+      const v = JSON.parse(localStorage.getItem(key));
+      return v === null || v === undefined ? fallback : v;
+    } catch (e) { return fallback; }
+  },
+  set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+};
+
+const KEYS = {
+  settings: 'arc_settings',
+  classes: 'arc_classes',
+  subjects: 'arc_subjects',
+  students: 'arc_students',
+  grades: 'arc_grades',
+  remarks: 'arc_remarks'
+};
+
+const DEFAULT_SUBJECTS = [
+  'English Language','Mathematics','Science','History',
+  'Rel. & Moral Edu. (RME)','Creative Arts','Computing','Ghanaian Language'
+];
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+function ensureDefaults() {
+  if (DB.get(KEYS.subjects, null) === null) {
+    DB.set(KEYS.subjects, DEFAULT_SUBJECTS.map(name => ({ id: uid(), name })));
+  }
+  if (DB.get(KEYS.settings, null) === null) {
+    DB.set(KEYS.settings, {
+      schoolName: '', address: '', email: '', logo: '',
+      currentTerm: 'Term 1', currentYear: '', attendanceOutOf: '', nextTermBegins: ''
+    });
+  }
+  if (DB.get(KEYS.classes, null) === null) DB.set(KEYS.classes, []);
+  if (DB.get(KEYS.students, null) === null) DB.set(KEYS.students, []);
+  if (DB.get(KEYS.grades, null) === null) DB.set(KEYS.grades, {});
+  if (DB.get(KEYS.remarks, null) === null) DB.set(KEYS.remarks, {});
+}
+
+/* ---------- grading & remark bands (school's own scale) ---------- */
+const GRADE_BANDS = [
+  { min: 80, grade: 1 }, { min: 75, grade: 2 }, { min: 70, grade: 3 },
+  { min: 65, grade: 4 }, { min: 60, grade: 5 }, { min: 50, grade: 6 },
+  { min: 45, grade: 7 }, { min: 40, grade: 8 }, { min: 0, grade: 9 }
+];
+const REMARK_BANDS = [
+  { min: 80, label: 'Highly Proficient' },
+  { min: 54, label: 'Proficient' },
+  { min: 46, label: 'Approaching Proficiency' },
+  { min: 40, label: 'Developing' },
+  { min: 0, label: 'Emerging' }
+];
+
+function getGradeFor(total) {
+  for (const b of GRADE_BANDS) { if (total >= b.min) return b.grade; }
+  return 9;
+}
+function getRemarkFor(total) {
+  for (const b of REMARK_BANDS) { if (total >= b.min) return b.label; }
+  return 'Emerging';
+}
+
+function gradeKey(classId, term, year) { return `${classId}__${term}__${year}`; }
+
+function clampScore(raw, max) {
+  if (raw === '') return '';
+  let n = Number(raw);
+  if (isNaN(n)) return '';
+  if (n < 0) n = 0;
+  if (n > max) n = max;
+  return n;
+}
+
+// Class Score is out of 60, scaled down to 50. Exam Score is out of 100,
+// scaled down to 50. The two combine into a Total out of 100.
+function scaleClass(raw) { return Math.round((raw / 60) * 50); }
+function scaleExam(raw) { return Math.round((raw / 100) * 50); }
+
+function ordinal(n) {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+/* ---------- view switching ---------- */
+const views = ['setup', 'classes', 'students', 'subjects', 'grades', 'remarks', 'reports'];
+function showView(name) {
+  views.forEach(v => {
+    document.getElementById('view-' + v).classList.toggle('hidden', v !== name);
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === name);
+  });
+  if (name === 'students') renderStudentClassSelect();
+  if (name === 'grades') renderGradesClassSelect();
+  if (name === 'remarks') renderRemarksClassSelect();
+  if (name === 'reports') renderReportsClassSelect();
+  renderClasses();
+  renderStudents();
+  renderSubjects();
+}
+
+/* ---------- Setup ---------- */
+function loadSettingsForm() {
+  const s = DB.get(KEYS.settings, {});
+  document.getElementById('schoolName').value = s.schoolName || '';
+  document.getElementById('schoolAddress').value = s.address || '';
+  document.getElementById('schoolEmail').value = s.email || '';
+  document.getElementById('currentTerm').value = s.currentTerm || 'Term 1';
+  document.getElementById('currentYear').value = s.currentYear || '';
+  document.getElementById('attendanceOutOf').value = s.attendanceOutOf || '';
+  document.getElementById('nextTermBegins').value = s.nextTermBegins || '';
+  const wrap = document.getElementById('logoPreviewWrap');
+  const img = document.getElementById('logoPreview');
+  if (s.logo) { img.src = s.logo; wrap.classList.remove('hidden'); }
+  else { wrap.classList.add('hidden'); }
+  updateTermBadge();
+}
+
+function updateTermBadge() {
+  const s = DB.get(KEYS.settings, {});
+  document.getElementById('termBadge').textContent = s.currentTerm && s.currentYear
+    ? `${s.currentTerm} · ${s.currentYear}` : 'Set up term';
+}
+
+document.getElementById('schoolLogo').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const s = DB.get(KEYS.settings, {});
+    s.logo = reader.result;
+    DB.set(KEYS.settings, s);
+    loadSettingsForm();
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('removeLogo').addEventListener('click', () => {
+  const s = DB.get(KEYS.settings, {});
+  s.logo = '';
+  DB.set(KEYS.settings, s);
+  loadSettingsForm();
+});
+
+document.getElementById('saveSettings').addEventListener('click', () => {
+  const s = DB.get(KEYS.settings, {});
+  s.schoolName = document.getElementById('schoolName').value.trim();
+  s.address = document.getElementById('schoolAddress').value.trim();
+  s.email = document.getElementById('schoolEmail').value.trim();
+  s.currentTerm = document.getElementById('currentTerm').value;
+  s.currentYear = document.getElementById('currentYear').value.trim();
+  s.attendanceOutOf = document.getElementById('attendanceOutOf').value.trim();
+  s.nextTermBegins = document.getElementById('nextTermBegins').value;
+  DB.set(KEYS.settings, s);
+  updateTermBadge();
+  alert('Settings saved. School name on report: ' + (s.schoolName || '(not set)'));
+});
+
+/* ---------- Classes ---------- */
+function renderClasses() {
+  const list = document.getElementById('classList');
+  const classes = DB.get(KEYS.classes, []);
+  list.innerHTML = '';
+  if (!classes.length) { list.innerHTML = '<li class="empty">No classes yet — add one below to get started.</li>'; return; }
+  classes.forEach(c => {
+    const students = DB.get(KEYS.students, []).filter(s => s.classId === c.id);
+    const li = document.createElement('li');
+    li.innerHTML = `<div><strong>${escapeHtml(c.name)}</strong><div class="meta">${students.length} student(s) on roll</div></div>
+      <div class="actions"><button data-id="${c.id}" class="del-class">Delete</button></div>`;
+    list.appendChild(li);
+  });
+  list.querySelectorAll('.del-class').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!confirm('Delete this class and its students/grades?')) return;
+      const id = btn.dataset.id;
+      DB.set(KEYS.classes, DB.get(KEYS.classes, []).filter(c => c.id !== id));
+      DB.set(KEYS.students, DB.get(KEYS.students, []).filter(s => s.classId !== id));
+      const grades = DB.get(KEYS.grades, {});
+      Object.keys(grades).forEach(k => { if (k.startsWith(id + '__')) delete grades[k]; });
+      DB.set(KEYS.grades, grades);
+      const remarks = DB.get(KEYS.remarks, {});
+      Object.keys(remarks).forEach(k => { if (k.startsWith(id + '__')) delete remarks[k]; });
+      DB.set(KEYS.remarks, remarks);
+      renderClasses();
+    });
+  });
+}
+
+document.getElementById('addClassBtn').addEventListener('click', () => {
+  const input = document.getElementById('newClassName');
+  const name = input.value.trim();
+  if (!name) return;
+  const classes = DB.get(KEYS.classes, []);
+  classes.push({ id: uid(), name });
+  DB.set(KEYS.classes, classes);
+  input.value = '';
+  renderClasses();
+});
+
+/* ---------- Students ---------- */
+function renderStudentClassSelect() {
+  const sel = document.getElementById('studentClassSelect');
+  fillClassSelect(sel);
+  renderStudents();
+}
+
+function fillClassSelect(sel) {
+  const classes = DB.get(KEYS.classes, []);
+  const prev = sel.value;
+  sel.innerHTML = classes.length
+    ? classes.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')
+    : '<option value="">No classes yet</option>';
+  if (classes.some(c => c.id === prev)) sel.value = prev;
+}
+
+function renderStudents() {
+  const sel = document.getElementById('studentClassSelect');
+  if (!sel.options.length) fillClassSelect(sel);
+  const classId = sel.value;
+  const list = document.getElementById('studentList');
+  const students = DB.get(KEYS.students, []).filter(s => s.classId === classId);
+  list.innerHTML = '';
+  if (!classId) { list.innerHTML = '<li class="empty">Add a class first.</li>'; return; }
+  if (!students.length) { list.innerHTML = '<li class="empty">No students yet — add one below.</li>'; return; }
+  students.forEach(st => {
+    const li = document.createElement('li');
+    const idPart = st.admissionId ? ` · ID ${escapeHtml(st.admissionId)}` : '';
+    li.innerHTML = `<div><strong>${escapeHtml(st.name)}</strong><div class="meta">${st.gender}${idPart}</div></div>
+      <div class="actions"><button data-id="${st.id}" class="del-student">Delete</button></div>`;
+    list.appendChild(li);
+  });
+  list.querySelectorAll('.del-student').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!confirm('Delete this student and their grades?')) return;
+      const id = btn.dataset.id;
+      DB.set(KEYS.students, DB.get(KEYS.students, []).filter(s => s.id !== id));
+      const grades = DB.get(KEYS.grades, {});
+      Object.keys(grades).forEach(k => { if (grades[k][id]) delete grades[k][id]; });
+      DB.set(KEYS.grades, grades);
+      const remarks = DB.get(KEYS.remarks, {});
+      Object.keys(remarks).forEach(k => { if (remarks[k][id]) delete remarks[k][id]; });
+      DB.set(KEYS.remarks, remarks);
+      renderStudents();
+      renderClasses();
+    });
+  });
+}
+
+document.getElementById('studentClassSelect').addEventListener('change', renderStudents);
+
+document.getElementById('addStudentBtn').addEventListener('click', () => {
+  const classId = document.getElementById('studentClassSelect').value;
+  if (!classId) { alert('Add a class first.'); return; }
+  const nameInput = document.getElementById('newStudentName');
+  const name = nameInput.value.trim();
+  if (!name) return;
+  const gender = document.getElementById('newStudentGender').value;
+  const admissionId = document.getElementById('newStudentId').value.trim();
+  const students = DB.get(KEYS.students, []);
+  students.push({ id: uid(), classId, name, gender, admissionId });
+  DB.set(KEYS.students, students);
+  nameInput.value = '';
+  document.getElementById('newStudentId').value = '';
+  renderStudents();
+  renderClasses();
+});
+
+/* ---------- Subjects ---------- */
+function renderSubjects() {
+  const list = document.getElementById('subjectList');
+  const subjects = DB.get(KEYS.subjects, []);
+  list.innerHTML = '';
+  if (!subjects.length) { list.innerHTML = '<li class="empty">No subjects yet — add one below.</li>'; return; }
+  subjects.forEach(sub => {
+    const li = document.createElement('li');
+    li.innerHTML = `<div>${escapeHtml(sub.name)}</div>
+      <div class="actions"><button data-id="${sub.id}" class="del-subject">Delete</button></div>`;
+    list.appendChild(li);
+  });
+  list.querySelectorAll('.del-subject').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (!confirm('Delete this subject from all classes?')) return;
+      const id = btn.dataset.id;
+      DB.set(KEYS.subjects, DB.get(KEYS.subjects, []).filter(s => s.id !== id));
+      renderSubjects();
+    });
+  });
+}
+
+document.getElementById('addSubjectBtn').addEventListener('click', () => {
+  const input = document.getElementById('newSubjectName');
+  const name = input.value.trim();
+  if (!name) return;
+  const subjects = DB.get(KEYS.subjects, []);
+  subjects.push({ id: uid(), name });
+  DB.set(KEYS.subjects, subjects);
+  input.value = '';
+  renderSubjects();
+});
+
+/* ---------- Grades entry (Class Score /60 + Exam Score /100 per subject) ---------- */
+function renderGradesClassSelect() {
+  const sel = document.getElementById('gradesClassSelect');
+  fillClassSelect(sel);
+  renderGradesTable();
+}
+
+function renderGradesTable() {
+  const classId = document.getElementById('gradesClassSelect').value;
+  const wrap = document.getElementById('gradesTableWrap');
+  if (!classId) { wrap.innerHTML = '<p class="empty">Add a class first.</p>'; return; }
+  const students = DB.get(KEYS.students, []).filter(s => s.classId === classId);
+  const subjects = DB.get(KEYS.subjects, []);
+  if (!students.length || !subjects.length) {
+    wrap.innerHTML = '<p class="empty">Add students and subjects first.</p>';
+    return;
+  }
+  const settings = DB.get(KEYS.settings, {});
+  const key = gradeKey(classId, settings.currentTerm, settings.currentYear);
+  const allGrades = DB.get(KEYS.grades, {});
+  const classGrades = allGrades[key] || {};
+
+  let html = '<div class="table-scroll"><table class="grades-table"><thead>';
+  html += '<tr><th class="name-col" rowspan="2">Student</th>';
+  subjects.forEach(sub => { html += `<th colspan="2">${escapeHtml(sub.name)}</th>`; });
+  html += '</tr><tr>';
+  subjects.forEach(() => { html += '<th class="sub-col">Class /60</th><th class="sub-col">Exam /100</th>'; });
+  html += '</tr></thead><tbody>';
+  students.forEach(st => {
+    html += `<tr><td class="name-col">${escapeHtml(st.name)}</td>`;
+    subjects.forEach(sub => {
+      const entry = classGrades[st.id] && classGrades[st.id][sub.id];
+      const cVal = entry && entry.c !== undefined ? entry.c : '';
+      const eVal = entry && entry.e !== undefined ? entry.e : '';
+      html += `<td><input type="number" min="0" max="60" inputmode="numeric" data-student="${st.id}" data-subject="${sub.id}" data-part="c" value="${cVal}"></td>`;
+      html += `<td><input type="number" min="0" max="100" inputmode="numeric" data-student="${st.id}" data-subject="${sub.id}" data-part="e" value="${eVal}"></td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+
+  // Live-clamp so an out-of-range value never sits waiting to be saved.
+  wrap.querySelectorAll('input[type="number"]').forEach(input => {
+    const max = input.dataset.part === 'c' ? 60 : 100;
+    input.addEventListener('input', () => {
+      const clamped = clampScore(input.value, max);
+      if (String(clamped) !== input.value) input.value = clamped;
+    });
+    input.addEventListener('blur', () => {
+      input.value = clampScore(input.value, max);
+    });
+  });
+}
+
+document.getElementById('gradesClassSelect').addEventListener('change', renderGradesTable);
+
+document.getElementById('saveGradesBtn').addEventListener('click', () => {
+  const classId = document.getElementById('gradesClassSelect').value;
+  if (!classId) return;
+  const settings = DB.get(KEYS.settings, {});
+  if (!settings.currentTerm || !settings.currentYear) {
+    alert('Set the current Term and Academic Year in Setup first.');
+    return;
+  }
+  const key = gradeKey(classId, settings.currentTerm, settings.currentYear);
+  const allGrades = DB.get(KEYS.grades, {});
+  const classGrades = allGrades[key] || {};
+  document.querySelectorAll('#gradesTableWrap input').forEach(input => {
+    const studentId = input.dataset.student;
+    const subjectId = input.dataset.subject;
+    const part = input.dataset.part;
+    const max = part === 'c' ? 60 : 100;
+    const clamped = clampScore(input.value, max);
+    if (!classGrades[studentId]) classGrades[studentId] = {};
+    if (!classGrades[studentId][subjectId]) classGrades[studentId][subjectId] = {};
+    if (clamped === '') { delete classGrades[studentId][subjectId][part]; }
+    else { classGrades[studentId][subjectId][part] = clamped; }
+  });
+  allGrades[key] = classGrades;
+  DB.set(KEYS.grades, allGrades);
+  alert('Grades saved.');
+});
+
+/* ---------- Remarks (attendance, conduct, fees, comments) ---------- */
+function renderRemarksClassSelect() {
+  const sel = document.getElementById('remarksClassSelect');
+  fillClassSelect(sel);
+  renderRemarksForm();
+}
+
+function renderRemarksForm() {
+  const classId = document.getElementById('remarksClassSelect').value;
+  const wrap = document.getElementById('remarksFormWrap');
+  if (!classId) { wrap.innerHTML = '<p class="empty">Add a class first.</p>'; return; }
+  const students = DB.get(KEYS.students, []).filter(s => s.classId === classId);
+  if (!students.length) { wrap.innerHTML = '<p class="empty">No students in this class.</p>'; return; }
+  const settings = DB.get(KEYS.settings, {});
+  const key = gradeKey(classId, settings.currentTerm, settings.currentYear);
+  const allRemarks = DB.get(KEYS.remarks, {});
+  const classRemarks = allRemarks[key] || {};
+
+  let html = '';
+  students.forEach(st => {
+    const r = classRemarks[st.id] || {};
+    html += `<div class="remarks-card" data-student="${st.id}">
+      <h3>${escapeHtml(st.name)}</h3>
+      <label>Attendance (days present)
+        <input type="number" min="0" class="rm-attendance" value="${r.attendance !== undefined ? r.attendance : ''}">
+      </label>
+      <label>Promoted / Repeated to
+        <input type="text" class="rm-promoted" placeholder="e.g. Basic Two (2)" value="${r.promoted ? escapeHtml(r.promoted) : ''}">
+      </label>
+      <label>Fees Due (GH¢)
+        <input type="number" min="0" step="0.01" class="rm-fees" value="${r.feesDue !== undefined ? r.feesDue : ''}">
+      </label>
+      <label>Conduct / Character
+        <input type="text" class="rm-conduct" placeholder="e.g. Faithfully performs classroom tasks" value="${r.conduct ? escapeHtml(r.conduct) : ''}">
+      </label>
+      <label>Attitude
+        <input type="text" class="rm-attitude" placeholder="e.g. Shows enthusiasm for classroom activities" value="${r.attitude ? escapeHtml(r.attitude) : ''}">
+      </label>
+      <label>Form Teacher's Comment
+        <input type="text" class="rm-comment" placeholder="e.g. Keep it up" value="${r.comment ? escapeHtml(r.comment) : ''}">
+      </label>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+document.getElementById('remarksClassSelect').addEventListener('change', renderRemarksForm);
+
+document.getElementById('saveRemarksBtn').addEventListener('click', () => {
+  const classId = document.getElementById('remarksClassSelect').value;
+  if (!classId) return;
+  const settings = DB.get(KEYS.settings, {});
+  if (!settings.currentTerm || !settings.currentYear) {
+    alert('Set the current Term and Academic Year in Setup first.');
+    return;
+  }
+  const key = gradeKey(classId, settings.currentTerm, settings.currentYear);
+  const allRemarks = DB.get(KEYS.remarks, {});
+  const classRemarks = allRemarks[key] || {};
+  document.querySelectorAll('.remarks-card').forEach(card => {
+    const studentId = card.dataset.student;
+    classRemarks[studentId] = {
+      attendance: card.querySelector('.rm-attendance').value.trim(),
+      promoted: card.querySelector('.rm-promoted').value.trim(),
+      feesDue: card.querySelector('.rm-fees').value.trim(),
+      conduct: card.querySelector('.rm-conduct').value.trim(),
+      attitude: card.querySelector('.rm-attitude').value.trim(),
+      comment: card.querySelector('.rm-comment').value.trim()
+    };
+  });
+  allRemarks[key] = classRemarks;
+  DB.set(KEYS.remarks, allRemarks);
+  alert('Remarks saved.');
+});
+
+// Aggregate = sum of grades of the first 4 subjects (in the order
+// subjects are listed) + the 2 best (lowest-numbered, i.e. best) grades
+// among the remaining subjects. Lower aggregate is better; 6 is the
+// best possible score. This mirrors standard BECE-style aggregate scoring.
+function computeAggregate(entries) {
+  if (!entries.length) return null;
+  const core = entries.slice(0, 4);
+  const electives = entries.slice(4);
+  const coreSum = core.reduce((a, b) => a + b.grade, 0);
+  const bestTwo = electives.slice().sort((a, b) => a.grade - b.grade).slice(0, 2);
+  const bestTwoSum = bestTwo.reduce((a, b) => a + b.grade, 0);
+  return coreSum + bestTwoSum;
+}
+
+/* ---------- Results computation ---------- */
+function computeClassResults(classId, term, year) {
+  const students = DB.get(KEYS.students, []).filter(s => s.classId === classId);
+  const subjects = DB.get(KEYS.subjects, []);
+  const key = gradeKey(classId, term, year);
+  const classGrades = DB.get(KEYS.grades, {})[key] || {};
+
+  const results = students.map(st => {
+    const scores = classGrades[st.id] || {};
+    // entries follow the subjects list order — required for "first 4" to be meaningful
+    const entries = subjects
+      .filter(sub => scores[sub.id] && scores[sub.id].c !== undefined && scores[sub.id].e !== undefined)
+      .map(sub => {
+        const raw = scores[sub.id];
+        const classScaled = scaleClass(Number(raw.c));
+        const examScaled = scaleExam(Number(raw.e));
+        const total = classScaled + examScaled;
+        return {
+          subject: sub, rawClass: Number(raw.c), rawExam: Number(raw.e),
+          classScaled, examScaled, total,
+          grade: getGradeFor(total), remark: getRemarkFor(total)
+        };
+      });
+    const totalSum = entries.reduce((a, b) => a + b.total, 0);
+    const avg = entries.length ? totalSum / entries.length : 0;
+    const aggregate = computeAggregate(entries);
+    return {
+      student: st, entries, totalSum, avg, aggregate,
+      overallRemark: entries.length ? getRemarkFor(avg) : null
+    };
+  });
+
+  // Rank by aggregate ascending — lower aggregate is better, matching
+  // how the aggregate is actually used to place students.
+  const ranked = results.filter(r => r.aggregate !== null).slice().sort((a, b) => a.aggregate - b.aggregate);
+  let rank = 0, lastAgg = null, seen = 0;
+  ranked.forEach(r => {
+    seen++;
+    if (r.aggregate !== lastAgg) { rank = seen; lastAgg = r.aggregate; }
+    r.position = rank;
+    r.outOf = ranked.length;
+  });
+  results.forEach(r => {
+    const match = ranked.find(x => x.student.id === r.student.id);
+    r.position = match ? match.position : null;
+    r.outOf = ranked.length;
+  });
+  return results;
+}
+
+// Per-subject class-wide position: e.g. "8th in Mathematics" for this class/term.
+function computeSubjectPositions(classId, term, year) {
+  const students = DB.get(KEYS.students, []).filter(s => s.classId === classId);
+  const subjects = DB.get(KEYS.subjects, []);
+  const key = gradeKey(classId, term, year);
+  const classGrades = DB.get(KEYS.grades, {})[key] || {};
+  const positions = {};
+
+  subjects.forEach(sub => {
+    const rows = [];
+    students.forEach(st => {
+      const sc = classGrades[st.id] && classGrades[st.id][sub.id];
+      if (sc && sc.c !== undefined && sc.e !== undefined) {
+        const total = scaleClass(Number(sc.c)) + scaleExam(Number(sc.e));
+        rows.push({ studentId: st.id, total });
+      }
+    });
+    rows.sort((a, b) => b.total - a.total);
+    let rank = 0, last = null, seen = 0;
+    const map = {};
+    rows.forEach(r => {
+      seen++;
+      if (r.total !== last) { rank = seen; last = r.total; }
+      map[r.studentId] = { position: rank, outOf: rows.length };
+    });
+    positions[sub.id] = map;
+  });
+  return positions;
+}
+
+/* ---------- Reports ---------- */
+function renderReportsClassSelect() {
+  const sel = document.getElementById('reportsClassSelect');
+  fillClassSelect(sel);
+  renderReportsStudentList();
+}
+
+function renderReportsStudentList() {
+  const classId = document.getElementById('reportsClassSelect').value;
+  const list = document.getElementById('reportsStudentList');
+  list.innerHTML = '';
+  if (!classId) { list.innerHTML = '<li class="empty">Add a class first.</li>'; return; }
+  const settings = DB.get(KEYS.settings, {});
+  const results = computeClassResults(classId, settings.currentTerm, settings.currentYear);
+  if (!results.length) { list.innerHTML = '<li class="empty">No students in this class.</li>'; return; }
+  results.forEach(r => {
+    const li = document.createElement('li');
+    li.innerHTML = `<div><strong>${escapeHtml(r.student.name)}</strong>
+        <div class="meta">${r.entries.length} subject(s) · Avg ${r.avg.toFixed(1)}</div></div>
+      <div class="actions"><button class="gen" data-id="${r.student.id}">Generate PDF</button></div>`;
+    list.appendChild(li);
+  });
+  list.querySelectorAll('.gen').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const studentId = btn.dataset.id;
+      const result = results.find(r => r.student.id === studentId);
+      const positions = computeSubjectPositions(classId, settings.currentTerm, settings.currentYear);
+      const numOnRoll = DB.get(KEYS.students, []).filter(s => s.classId === classId).length;
+      const classInfo = DB.get(KEYS.classes, []).find(c => c.id === classId);
+      const remarksAll = DB.get(KEYS.remarks, {})[gradeKey(classId, settings.currentTerm, settings.currentYear)] || {};
+      generateSinglePDF(result, positions, numOnRoll, classInfo, remarksAll[studentId] || {});
+    });
+  });
+}
+
+document.getElementById('reportsClassSelect').addEventListener('change', renderReportsStudentList);
+
+document.getElementById('generateAllBtn').addEventListener('click', () => {
+  const classId = document.getElementById('reportsClassSelect').value;
+  if (!classId) { alert('Add a class first.'); return; }
+  const settings = DB.get(KEYS.settings, {});
+  const results = computeClassResults(classId, settings.currentTerm, settings.currentYear);
+  if (!results.length) { alert('No students in this class.'); return; }
+  const positions = computeSubjectPositions(classId, settings.currentTerm, settings.currentYear);
+  const numOnRoll = DB.get(KEYS.students, []).filter(s => s.classId === classId).length;
+  const classInfo = DB.get(KEYS.classes, []).find(c => c.id === classId);
+  const remarksAll = DB.get(KEYS.remarks, {})[gradeKey(classId, settings.currentTerm, settings.currentYear)] || {};
+  generateBatchPDF(results, positions, numOnRoll, classInfo, remarksAll);
+});
+
+/* ---------- PDF generation ---------- */
+const INK = [22, 36, 28];
+const GOLD = [162, 128, 33];
+const RED_INK = [150, 55, 40];
+
+function drawReportPage(doc, result, settings, positions, numOnRoll, classInfo, studentRemarks) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const left = 15, right = pageWidth - 15;
+  let y = 18;
+
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  const schoolName = (settings.schoolName && settings.schoolName.trim()) ? settings.schoolName.trim() : 'School Name Not Set';
+  doc.text(schoolName, pageWidth / 2, y, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  let subY = y + 6;
+  if (settings.address) { doc.text(settings.address, pageWidth / 2, subY, { align: 'center' }); subY += 5; }
+  if (settings.email) { doc.text(settings.email, pageWidth / 2, subY, { align: 'center' }); subY += 5; }
+  y = subY + 2;
+
+  doc.setDrawColor(GOLD[0], GOLD[1], GOLD[2]);
+  doc.setLineWidth(0.8);
+  doc.line(pageWidth / 2 - 30, y, pageWidth / 2 + 30, y);
+  y += 8;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('REPORT CARD', pageWidth / 2, y, { align: 'center' });
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.2);
+  doc.setTextColor(0, 0, 0);
+
+  if (settings.logo) {
+    try { doc.addImage(settings.logo, 'PNG', left, 12, 20, 20); }
+    catch (e) { try { doc.addImage(settings.logo, 'JPEG', left, 12, 20, 20); } catch (e2) {} }
+  }
+
+  y += 10;
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Name: ${result.student.name}`, left, y);
+  doc.text(`ID: ${result.student.admissionId || '-'}`, right - 35, y);
+  y += 6;
+  doc.text(`Class: ${classInfo ? classInfo.name : ''}`, left, y);
+  doc.text(`Term: ${settings.currentTerm || ''}`, left + 70, y);
+  doc.text(`Year: ${settings.currentYear || ''}`, right - 35, y);
+
+  y += 8;
+  // Results table: Subject | Class | Exam | Total | Grade | Position | Remark
+  // Column widths sum to exactly the printable width (left to right) so
+  // the table fills the page edge-to-edge instead of leaving dead space.
+  const colW = [46, 19, 19, 19, 15, 18, 44];
+  const colX = [left];
+  colW.forEach(w => colX.push(colX[colX.length - 1] + w));
+  const headers = ['Subject', 'Class', 'Exam', 'Total', 'Grade', 'Position', 'Remark'];
+  const rowH = 8;
+  const centerCols = [1, 2, 3, 4, 5]; // Class, Exam, Total, Grade, Position — body Subject/Remark stay left-aligned
+
+  const cellText = (text, i, yPos, bold, forceCenter) => {
+    if (bold) doc.setFont('helvetica', 'bold'); else doc.setFont('helvetica', 'normal');
+    if (forceCenter || centerCols.includes(i)) {
+      doc.text(text, colX[i] + colW[i] / 2, yPos, { align: 'center' });
+    } else {
+      doc.text(text, colX[i] + 3, yPos);
+    }
+  };
+
+  doc.setFillColor(INK[0], INK[1], INK[2]);
+  doc.setTextColor(255, 255, 255);
+  doc.rect(left, y, colX[7] - left, rowH, 'F');
+  doc.setFontSize(9);
+  headers.forEach((h, i) => cellText(h, i, y + 5.5, true, true));
+  y += rowH;
+  doc.setTextColor(0, 0, 0);
+
+  result.entries.forEach(en => {
+    const weak = en.grade >= 7;
+    const pos = positions[en.subject.id] && positions[en.subject.id][result.student.id];
+    doc.rect(left, y, colX[7] - left, rowH);
+    for (let i = 1; i < 7; i++) doc.line(colX[i], y, colX[i], y + rowH);
+    doc.setFontSize(8.5);
+    cellText(String(en.subject.name), 0, y + 5.5, false);
+    cellText(String(en.classScaled), 1, y + 5.5, false);
+    cellText(String(en.examScaled), 2, y + 5.5, false);
+    cellText(String(en.total), 3, y + 5.5, false);
+    if (weak) doc.setTextColor(RED_INK[0], RED_INK[1], RED_INK[2]);
+    cellText(String(en.grade), 4, y + 5.5, false);
+    doc.setTextColor(0, 0, 0);
+    cellText(pos ? ordinal(pos.position) : '-', 5, y + 5.5, false);
+    cellText(en.remark, 6, y + 5.5, false);
+    y += rowH;
+  });
+
+  // Overall row — Grade column shows the aggregate (first 4 subjects +
+  // best 2 of the rest); Remark column carries the position callout,
+  // matching the source template's layout.
+  doc.setFillColor(230, 224, 200);
+  doc.rect(left, y, colX[7] - left, rowH, 'F');
+  for (let i = 1; i < 7; i++) doc.line(colX[i], y, colX[i], y + rowH);
+  doc.rect(left, y, colX[7] - left, rowH);
+  doc.setFontSize(9);
+  cellText('Overall', 0, y + 5.5, true);
+  cellText(String(result.totalSum), 3, y + 5.5, true);
+  cellText(result.aggregate !== null ? String(result.aggregate) : '-', 4, y + 5.5, true);
+  cellText(result.position ? ordinal(result.position) : '-', 5, y + 5.5, true);
+  cellText('Class Position', 6, y + 5.5, true);
+  y += rowH + 8;
+
+  // Attendance / roll / promotion / fees / next term
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9.5);
+  const attOutOf = settings.attendanceOutOf || '-';
+  doc.text(`Attendance: ${studentRemarks.attendance || 0} out of ${attOutOf}`, left, y);
+  doc.text(`Number on Roll: ${numOnRoll}`, right - 55, y);
+  y += 6;
+  doc.text(`Promoted/Repeated: ${studentRemarks.promoted || '-'}`, left, y);
+  doc.text(`Fees Due: GH¢ ${studentRemarks.feesDue || '0.00'}`, right - 55, y);
+  y += 6;
+  doc.text(`Next Term Begins: ${settings.nextTermBegins || '-'}`, left, y);
+  y += 10;
+
+  const wrapField = (label, value) => {
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${label}:`, left, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(value || '-', left + 42, y);
+    y += 7;
+  };
+  wrapField('Conduct/Character', studentRemarks.conduct);
+  wrapField('Attitude', studentRemarks.attitude);
+  wrapField("Form Teacher's Comment", studentRemarks.comment);
+
+  y += 8;
+  doc.text('Class Teacher: ____________________', left, y);
+  doc.text('Head Teacher: ____________________', right - 80, y);
+  y += 10;
+  doc.setFontSize(8);
+  doc.text(`Date: ${new Date().toLocaleDateString()}`, left, y);
+
+  // Compact grading/remarks legend footer
+  y += 10;
+  doc.setFontSize(7);
+  doc.setTextColor(90, 90, 90);
+  doc.text('Grading: 80-100=1  75-79=2  70-74=3  65-69=4  60-64=5  50-59=6  45-49=7  40-44=8  0-39=9', left, y);
+  y += 4;
+  doc.text('Remarks: 80-100 Highly Proficient · 54-79 Proficient · 46-53 Approaching Proficiency · 40-45 Developing · 0-39 Emerging', left, y);
+  doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+  doc.setFontSize(8);
+  doc.text('Generated with AlatiphA Report Cards', pageWidth / 2, doc.internal.pageSize.getHeight() - 8, { align: 'center' });
+  doc.setTextColor(0, 0, 0);
+}
+
+function generateSinglePDF(result, positions, numOnRoll, classInfo, studentRemarks) {
+  if (!result.entries.length) { alert('No grades entered for this student yet.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const settings = DB.get(KEYS.settings, {});
+  drawReportPage(doc, result, settings, positions, numOnRoll, classInfo, studentRemarks);
+  doc.save(`${result.student.name.replace(/\s+/g, '_')}_report.pdf`);
+}
+
+function generateBatchPDF(results, positions, numOnRoll, classInfo, remarksAll) {
+  const usable = results.filter(r => r.entries.length > 0);
+  if (!usable.length) { alert('No grades entered for this class yet.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const settings = DB.get(KEYS.settings, {});
+  usable.forEach((r, i) => {
+    if (i > 0) doc.addPage();
+    drawReportPage(doc, r, settings, positions, numOnRoll, classInfo, remarksAll[r.student.id] || {});
+  });
+  doc.save('class_report_cards.pdf');
+}
+
+/* ---------- utils ---------- */
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, m => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[m]));
+}
+
+/* ---------- nav ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => showView(btn.dataset.view));
+});
+
+/* ---------- init ---------- */
+ensureDefaults();
+loadSettingsForm();
+showView('setup');
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
