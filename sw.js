@@ -1,15 +1,16 @@
 // AlatiphA Report Cards — service worker
-// Keep CACHE_NAME's version in sync with APP_VERSION in app-3.js
-const CACHE_NAME = 'arc-cache-v3';
+// Keep CACHE_NAME's version in sync with APP_VERSION in app-4.js
+const CACHE_NAME = 'arc-cache-v4';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './style-3.css',
-  './app-3.js',
+  './style-4.css',
+  './app-4.js',
   './manifest.json',
   './icon.svg',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  'https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap'
 ];
 
 self.addEventListener('install', event => {

@@ -8,12 +8,15 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
-<link rel="stylesheet" href="style-3.css">
+<link rel="stylesheet" href="style-4.css">
 </head>
 <body>
 
 <header class="topbar">
-  <span class="brand">AlatiphA Report Cards</span>
+  <span class="brand">
+    <img src="icon.svg" alt="" class="seal">
+    AlatiphA Report Cards
+  </span>
   <span class="term-badge" id="termBadge">—</span>
 </header>
 
@@ -115,15 +118,15 @@
 </main>
 
 <nav class="tabbar">
-  <button data-view="setup" class="tab-btn active">Setup</button>
-  <button data-view="classes" class="tab-btn">Classes</button>
-  <button data-view="students" class="tab-btn">Students</button>
-  <button data-view="subjects" class="tab-btn">Subjects</button>
-  <button data-view="grades" class="tab-btn">Grades</button>
-  <button data-view="reports" class="tab-btn">Reports</button>
+  <button data-view="setup" data-step="1" class="tab-btn active">Setup</button>
+  <button data-view="classes" data-step="2" class="tab-btn">Classes</button>
+  <button data-view="students" data-step="3" class="tab-btn">Students</button>
+  <button data-view="subjects" data-step="4" class="tab-btn">Subjects</button>
+  <button data-view="grades" data-step="5" class="tab-btn">Grades</button>
+  <button data-view="reports" data-step="6" class="tab-btn">Reports</button>
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app-3.js"></script>
+<script src="app-4.js"></script>
 </body>
 </html>
