@@ -1,12 +1,12 @@
 // AlatiphA Report Cards — service worker
-// Keep CACHE_NAME's version in sync with APP_VERSION in app-15.js
-const CACHE_NAME = 'arc-cache-v15';
+// Keep CACHE_NAME's version in sync with APP_VERSION in app-16.js
+const CACHE_NAME = 'arc-cache-v16';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './style-9.css',
-  './app-15.js',
+  './style-10.css',
+  './app-16.js',
   './manifest.json',
   './icon.svg',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',

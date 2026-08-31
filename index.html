@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
-<link rel="stylesheet" href="style-9.css">
+<link rel="stylesheet" href="style-10.css">
 <script>
   (function () {
     try {
@@ -77,6 +77,15 @@
     </label>
     <button id="saveSettings" class="btn-primary">Save Settings</button>
     <p class="hint">Grade: 80–100=1 · 75–79=2 · 70–74=3 · 65–69=4 · 60–64=5 · 50–59=6 · 45–49=7 · 40–44=8 · 0–39=9. Remark: 80–100 Highly Proficient · 54–79 Proficient · 46–53 Approaching Proficiency · 40–45 Developing · 0–39 Emerging. The school name only appears on report cards after you tap Save Settings.</p>
+
+    <div class="backup-section">
+      <h3 class="subsection-title">Backup &amp; Restore</h3>
+      <button id="exportBackupBtn" class="btn-primary">Export Backup (.json)</button>
+      <label>Import Backup
+        <input type="file" id="importBackupInput" accept="application/json,.json">
+      </label>
+      <p class="hint">Export saves everything — classes, students, subjects, grades and remarks — to a file you can keep safe or move to another phone. Importing replaces all current data with the contents of that file, so keep a recent backup before you do.</p>
+    </div>
   </section>
 
   <!-- CLASSES -->
@@ -170,6 +179,6 @@
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app-15.js"></script>
+<script src="app-16.js"></script>
 </body>
 </html>
