@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
-<link rel="stylesheet" href="style-6.css">
+<link rel="stylesheet" href="style-7.css">
 </head>
 <body>
 
@@ -61,6 +61,12 @@
         <input type="date" id="nextTermBegins">
       </label>
     </div>
+    <label>Report Layout
+      <select id="reportLayout">
+        <option value="standard">Standard (Class/Exam breakdown, Grade &amp; Aggregate)</option>
+        <option value="simple">Simple (Basic/KG-friendly — Total &amp; Remark only)</option>
+      </select>
+    </label>
     <button id="saveSettings" class="btn-primary">Save Settings</button>
     <p class="hint">Grade: 80–100=1 · 75–79=2 · 70–74=3 · 65–69=4 · 60–64=5 · 50–59=6 · 45–49=7 · 40–44=8 · 0–39=9. Remark: 80–100 Highly Proficient · 54–79 Proficient · 46–53 Approaching Proficiency · 40–45 Developing · 0–39 Emerging. The school name only appears on report cards after you tap Save Settings.</p>
   </section>
@@ -89,6 +95,12 @@
         <option value="F">Female</option>
       </select>
       <button id="addStudentBtn" class="btn-primary">Add Student</button>
+    </div>
+    <div class="stack">
+      <label>Bulk Add — one name per line, optionally "Name, ID"
+        <textarea id="bulkStudentInput" rows="4" placeholder="Jane Doe, 101&#10;John Smith"></textarea>
+      </label>
+      <button id="bulkAddStudentsBtn" class="btn-primary">Add All</button>
     </div>
     <ul id="studentList" class="list"></ul>
   </section>
@@ -150,6 +162,6 @@
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app-11.js"></script>
+<script src="app-12.js"></script>
 </body>
 </html>
