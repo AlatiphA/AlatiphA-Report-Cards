@@ -1,6 +1,6 @@
 // AlatiphA Report Cards — service worker
 // Keep CACHE_NAME's version in sync with APP_VERSION in app-19.js
-const CACHE_NAME = 'arc-cache-v19';
+const CACHE_NAME = 'arc-cache-v20';
 
 const APP_SHELL = [
   './',
@@ -9,6 +9,10 @@ const APP_SHELL = [
   './app-19.js',
   './manifest.json',
   './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-512-maskable.png',
+  './apple-touch-icon.png',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap'
 ];
