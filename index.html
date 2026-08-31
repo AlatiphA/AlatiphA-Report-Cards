@@ -63,8 +63,8 @@
     </div>
     <label>Report Layout
       <select id="reportLayout">
-        <option value="standard">Standard (Class/Exam breakdown, Grade &amp; Aggregate)</option>
-        <option value="simple">Simple (Basic/KG-friendly — Total &amp; Remark only)</option>
+        <option value="standard">Standard (Class + Exam Score, both used)</option>
+        <option value="simple">Simple (Exam Score only — Class Score hidden and unused)</option>
       </select>
     </label>
     <button id="saveSettings" class="btn-primary">Save Settings</button>
@@ -124,7 +124,7 @@
     </label>
     <div id="gradesTableWrap"></div>
     <button id="saveGradesBtn" class="btn-primary">Save Grades</button>
-    <p class="hint">Class Score is out of 60, scaled to 50. Exam Score is out of 100, scaled to 50. Total is out of 100.</p>
+    <p class="hint">Standard layout: Class Score is out of 60, scaled to 50; Exam Score is out of 100, scaled to 50; Total is out of 100. Simple layout: only Exam Score (out of 100) is entered and used as the Total — Class Score is hidden.</p>
   </section>
 
   <!-- REMARKS -->
@@ -162,6 +162,6 @@
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app-12.js"></script>
+<script src="app-13.js"></script>
 </body>
 </html>
