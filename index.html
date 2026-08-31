@@ -12,7 +12,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Report Cards">
-<link rel="stylesheet" href="style-11.css">
+<link rel="stylesheet" href="style-12.css">
 <script>
   (function () {
     try {
@@ -105,12 +105,16 @@
   <!-- STUDENTS -->
   <section id="view-students" class="view hidden">
     <h2>Students</h2>
+    <label>Search All Classes
+      <input type="text" id="studentSearchInput" placeholder="Search by name or ID...">
+    </label>
     <label>Class
       <select id="studentClassSelect"></select>
     </label>
     <div class="stack">
       <input type="text" id="newStudentName" placeholder="Full name">
       <input type="text" id="newStudentId" placeholder="Student ID (optional)">
+      <input type="tel" id="newStudentPhone" placeholder="Parent phone (optional, for WhatsApp)">
       <select id="newStudentGender">
         <option value="M">Male</option>
         <option value="F">Female</option>
@@ -185,6 +189,6 @@
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app-19.js"></script>
+<script src="app-20.js"></script>
 </body>
 </html>

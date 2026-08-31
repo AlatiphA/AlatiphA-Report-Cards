@@ -1,12 +1,12 @@
 // AlatiphA Report Cards — service worker
-// Keep CACHE_NAME's version in sync with APP_VERSION in app-19.js
-const CACHE_NAME = 'arc-cache-v20';
+// Keep CACHE_NAME's version in sync with APP_VERSION in app-20.js
+const CACHE_NAME = 'arc-cache-v21';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './style-11.css',
-  './app-19.js',
+  './style-12.css',
+  './app-20.js',
   './manifest.json',
   './icon.svg',
   './icon-192.png',
