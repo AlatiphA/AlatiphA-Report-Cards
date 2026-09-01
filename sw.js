@@ -1,12 +1,12 @@
 // AlatiphA Report Cards — service worker
-// Keep CACHE_NAME's version in sync with APP_VERSION in app-20.js
-const CACHE_NAME = 'arc-cache-v21';
+// Keep CACHE_NAME's version in sync with APP_VERSION in app-21.js
+const CACHE_NAME = 'arc-cache-v22';
 
 const APP_SHELL = [
   './',
   './index.html',
   './style-12.css',
-  './app-20.js',
+  './app-21.js',
   './manifest.json',
   './icon.svg',
   './icon-192.png',
@@ -14,6 +14,7 @@ const APP_SHELL = [
   './icon-512-maskable.png',
   './apple-touch-icon.png',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
   'https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap'
 ];
 

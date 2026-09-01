@@ -150,6 +150,15 @@
     <div id="gradesTableWrap"></div>
     <button id="saveGradesBtn" class="btn-primary">Save Grades</button>
     <p class="hint">Standard layout: Class Score is out of 60, scaled to 50; Exam Score is out of 100, scaled to 50; Total is out of 100. Simple layout: only Exam Score (out of 100) is entered and used as the Total — Class Score is hidden.</p>
+
+    <div class="backup-section">
+      <h3 class="subsection-title">Bulk Grade (Excel)</h3>
+      <button id="exportGradesXlsxBtn" class="btn-primary">Export Grades to Excel</button>
+      <label>Import Grades from Excel
+        <input type="file" id="importGradesXlsxInput" accept=".xlsx,.xls,.csv">
+      </label>
+      <p class="hint">Export the current class's grade sheet, fill it in offline in Excel, then import it back — this replaces all scores for this class, term and year with what's in the file.</p>
+    </div>
   </section>
 
   <!-- REMARKS -->
@@ -189,6 +198,7 @@
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="app-20.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="app-21.js"></script>
 </body>
 </html>
