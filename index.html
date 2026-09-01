@@ -12,7 +12,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Report Cards">
-<link rel="stylesheet" href="style-14.css">
+<link rel="stylesheet" href="style-15.css">
 <script>
   (function () {
     try {
@@ -35,20 +35,50 @@
   </div>
 </div>
 
-
 <header class="topbar">
-  <span class="brand">
-    <img src="icon.svg" alt="" class="seal">
-    AlatiphA Report Cards
-  </span>
-  <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme"></button>
+  <div class="topbar-left">
+    <button id="backBtn" class="back-btn hidden" type="button" aria-label="Back">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <span class="brand">
+      <img src="icon.svg" alt="" class="seal">
+      <span id="brandText">AlatiphA Report Cards</span>
+    </span>
+  </div>
+  <div class="topbar-right">
+    <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme"></button>
+    <div class="profile-menu">
+      <button id="profileBtn" class="profile-btn" type="button" aria-label="Account menu">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+        <svg class="chevron" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div id="profileDropdown" class="profile-dropdown hidden">
+        <div id="profileSchoolName" class="profile-school-name">—</div>
+        <div id="profileTermYear" class="profile-term-year">—</div>
+        <button type="button" id="profileSetupLink" class="profile-link">Go to Setup</button>
+      </div>
+    </div>
+  </div>
 </header>
 
 <main id="app">
 
+  <!-- HOME DASHBOARD -->
+  <section id="view-home" class="view">
+    <div class="welcome-block">
+      <h1 id="welcomeHeading">Welcome back</h1>
+      <p id="welcomeSubtext" class="welcome-subtext">Here's what's happening with your classes.</p>
+    </div>
+    <div id="statsSummary" class="stats-summary"></div>
+    <div class="quick-access-list" id="quickAccessList"></div>
+  </section>
+
   <!-- SETUP -->
-  <section id="view-setup" class="view">
+  <section id="view-setup" class="view hidden">
     <h2>School Setup</h2>
+    <label>Teacher Name (optional)
+      <input type="text" id="teacherName" placeholder="e.g. Abdul-Latif Ahmed">
+    </label>
     <label>School Name
       <input type="text" id="schoolName" placeholder="e.g. Zoozugu T. I. Ahmadiyya Pri/KG">
     </label>
@@ -202,6 +232,7 @@
     <div id="classStatsWrap" class="backup-section"></div>
   </section>
 
+  <!-- TERM HISTORY -->
   <section id="view-history" class="view hidden">
     <h2>Term History</h2>
     <label>Term / Year
@@ -238,19 +269,8 @@
 
 </main>
 
-<nav class="tabbar">
-  <button data-view="setup" data-step="1" class="tab-btn active">Setup</button>
-  <button data-view="classes" data-step="2" class="tab-btn">Classes</button>
-  <button data-view="students" data-step="3" class="tab-btn">Students</button>
-  <button data-view="subjects" data-step="4" class="tab-btn">Subjects</button>
-  <button data-view="grades" data-step="5" class="tab-btn">Grades</button>
-  <button data-view="remarks" data-step="6" class="tab-btn">Remarks</button>
-  <button data-view="reports" data-step="7" class="tab-btn">Reports</button>
-  <button data-view="history" data-step="8" class="tab-btn">History</button>
-</nav>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="app-24.js"></script>
+<script src="app-25.js"></script>
 </body>
 </html>
