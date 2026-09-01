@@ -202,6 +202,40 @@
     <div id="classStatsWrap" class="backup-section"></div>
   </section>
 
+  <section id="view-history" class="view hidden">
+    <h2>Term History</h2>
+    <label>Term / Year
+      <select id="historyTermYearSelect"></select>
+    </label>
+    <label>Class
+      <select id="historyClassSelect"></select>
+    </label>
+    <div id="historyStatsWrap"></div>
+    <div class="stack">
+      <button id="historyGenerateAllBtn" class="btn-primary">Generate Class Batch PDF</button>
+      <button id="historyExportCsvBtn" class="btn-primary">Export Results as CSV</button>
+    </div>
+    <ul id="historyStudentList" class="list"></ul>
+
+    <div class="backup-section">
+      <h3 class="subsection-title">Start New Term</h3>
+      <div class="row">
+        <label>Term
+          <select id="newTermSelect">
+            <option value="Term 1">Term One (1)</option>
+            <option value="Term 2">Term Two (2)</option>
+            <option value="Term 3">Term Three (3)</option>
+          </select>
+        </label>
+        <label>Academic Year
+          <input type="text" id="newTermYearInput" placeholder="e.g. 2026/2027">
+        </label>
+      </div>
+      <button id="startNewTermBtn" class="btn-primary">Start New Term</button>
+      <p class="hint">Classes, students and subjects are shared across every term — nothing needs to be re-entered. This just moves the app's current Term/Year forward for new grade entry; every past term's data stays saved and browsable above.</p>
+    </div>
+  </section>
+
 </main>
 
 <nav class="tabbar">
@@ -212,10 +246,11 @@
   <button data-view="grades" data-step="5" class="tab-btn">Grades</button>
   <button data-view="remarks" data-step="6" class="tab-btn">Remarks</button>
   <button data-view="reports" data-step="7" class="tab-btn">Reports</button>
+  <button data-view="history" data-step="8" class="tab-btn">History</button>
 </nav>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="app-23.js"></script>
+<script src="app-24.js"></script>
 </body>
 </html>
