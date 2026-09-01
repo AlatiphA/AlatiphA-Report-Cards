@@ -12,7 +12,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Report Cards">
-<link rel="stylesheet" href="style-15.css">
+<link rel="stylesheet" href="style-16.css">
 <script>
   (function () {
     try {
@@ -121,6 +121,9 @@
         <option value="simple">Simple (Exam Score only — Class Score hidden and unused)</option>
       </select>
     </label>
+    <label>Head Teacher (for signatures on report cards)
+      <select id="headTeacherSelect"></select>
+    </label>
     <button id="saveSettings" class="btn-primary">Save Settings</button>
     <p class="hint">Grade: 80–100=1 · 75–79=2 · 70–74=3 · 65–69=4 · 60–64=5 · 50–59=6 · 45–49=7 · 40–44=8 · 0–39=9. Remark: 80–100 Highly Proficient · 54–79 Proficient · 46–53 Approaching Proficiency · 40–45 Developing · 0–39 Emerging. The school name only appears on report cards after you tap Save Settings.</p>
 
@@ -130,7 +133,7 @@
       <label>Import Backup
         <input type="file" id="importBackupInput" accept="application/json,.json">
       </label>
-      <p class="hint">Export saves everything — classes, students, subjects, grades and remarks — to a file you can keep safe or move to another phone. Importing replaces all current data with the contents of that file, so keep a recent backup before you do.</p>
+      <p class="hint">Export saves everything — classes, students, subjects, grades, remarks and staff — to a file you can keep safe or move to another phone. Importing replaces all current data with the contents of that file, so keep a recent backup before you do.</p>
     </div>
 
     <div class="backup-section">
@@ -139,11 +142,43 @@
     </div>
   </section>
 
+  <!-- STAFF -->
+  <section id="view-staff" class="view hidden">
+    <h2>Staff</h2>
+    <div class="stack">
+      <input type="text" id="newStaffName" placeholder="Full name">
+      <select id="newStaffRole">
+        <option value="Teacher">Teacher</option>
+        <option value="Head Teacher">Head Teacher</option>
+        <option value="Assistant Head Teacher">Assistant Head Teacher</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="date" id="newStaff_dob" placeholder="Date of Birth">
+      <input type="text" id="newStaff_staffId" placeholder="Staff ID">
+      <input type="text" id="newStaff_registeredNo" placeholder="Registered No.">
+      <input type="text" id="newStaff_licenseNo" placeholder="License No.">
+      <input type="text" id="newStaff_ssnitNo" placeholder="SSNIT No.">
+      <input type="text" id="newStaff_ghanaCardId" placeholder="Ghana Card ID">
+      <input type="date" id="newStaff_dateOfAppointment" placeholder="Date of Appointment">
+      <input type="text" id="newStaff_rank" placeholder="Rank (e.g. Superintendent I)">
+      <input type="tel" id="newStaff_phone" placeholder="Phone (optional)">
+      <label>Signature
+        <input type="file" id="newStaffSignature" accept="image/*">
+      </label>
+      <button id="addStaffBtn" class="btn-primary">Add Staff</button>
+    </div>
+    <ul id="staffList" class="list"></ul>
+    <p class="hint">Assign a staff member as a Class Teacher from the Classes tab, and as Head Teacher from Setup — their uploaded signature will then appear automatically on report cards.</p>
+  </section>
+
   <!-- CLASSES -->
   <section id="view-classes" class="view hidden">
     <h2>Classes</h2>
     <div class="stack">
       <input type="text" id="newClassName" placeholder="e.g. Basic One (1)">
+      <label>Class Teacher
+        <select id="newClassTeacherSelect"></select>
+      </label>
       <button id="addClassBtn" class="btn-primary">Add Class</button>
     </div>
     <ul id="classList" class="list"></ul>
@@ -271,6 +306,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="app-25.js"></script>
+<script src="app-26.js"></script>
 </body>
 </html>
