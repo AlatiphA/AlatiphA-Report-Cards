@@ -12,17 +12,29 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Report Cards">
-<link rel="stylesheet" href="style-13.css">
+<link rel="stylesheet" href="style-14.css">
 <script>
   (function () {
     try {
       var t = localStorage.getItem('arc_theme');
       if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      if (localStorage.getItem('arc_pin_hash')) document.documentElement.classList.add('locked');
     } catch (e) {}
   })();
 </script>
 </head>
 <body>
+
+<div id="lockOverlay">
+  <div class="lock-box">
+    <img src="icon.svg" alt="" class="lock-seal">
+    <h2>Enter PIN</h2>
+    <input type="password" inputmode="numeric" pattern="[0-9]*" id="lockPinInput" maxlength="8" placeholder="PIN">
+    <button id="lockUnlockBtn" class="btn-primary">Unlock</button>
+    <p id="lockError" class="lock-error hidden">Incorrect PIN. Try again.</p>
+  </div>
+</div>
+
 
 <header class="topbar">
   <span class="brand">
@@ -89,6 +101,11 @@
         <input type="file" id="importBackupInput" accept="application/json,.json">
       </label>
       <p class="hint">Export saves everything — classes, students, subjects, grades and remarks — to a file you can keep safe or move to another phone. Importing replaces all current data with the contents of that file, so keep a recent backup before you do.</p>
+    </div>
+
+    <div class="backup-section">
+      <h3 class="subsection-title">PIN Lock</h3>
+      <div id="pinStatusWrap"></div>
     </div>
   </section>
 
@@ -199,6 +216,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="app-22.js"></script>
+<script src="app-23.js"></script>
 </body>
 </html>
