@@ -33,19 +33,22 @@
   <div class="lock-box">
     <img src="icon.svg" alt="" class="lock-seal">
     <h2 id="authHeading">Teacher Sign In</h2>
-    <input type="email" id="authEmail" placeholder="Email" autocomplete="email">
-    <div class="password-field">
-      <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
-      <button type="button" id="authPasswordToggle" class="password-toggle" aria-label="Show password">
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
+    <div id="authFormFields">
+      <input type="email" id="authEmail" placeholder="Email" autocomplete="email">
+      <div class="password-field">
+        <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+        <button type="button" id="authPasswordToggle" class="password-toggle" aria-label="Show password">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <button id="authSubmitBtn" class="btn-primary">Log In</button>
+      <button type="button" id="authToggleModeBtn" class="btn-text">Need an account? Sign up</button>
+      <button type="button" id="authForgotBtn" class="btn-text">Forgot password?</button>
+      <button type="button" id="authGuestBtn" class="btn-text">Continue without an account</button>
     </div>
-    <button id="authSubmitBtn" class="btn-primary">Log In</button>
-    <button type="button" id="authToggleModeBtn" class="btn-text">Need an account? Sign up</button>
-    <button type="button" id="authForgotBtn" class="btn-text">Forgot password?</button>
-    <button type="button" id="authGuestBtn" class="btn-text">Continue without an account</button>
+    <p id="authSyncingMsg" class="hint hidden">Syncing your data from the cloud…</p>
     <p id="authError" class="lock-error hidden"></p>
-    <p class="hint">Creating an account keeps your data separate going forward from other teachers (or guest mode) on this device — but it starts as a copy of whatever's already here, so it won't look different right away. Multi-device cloud sync is coming in a future update. You can switch back to "Continue without an account" any time from the profile menu (top right).</p>
+    <p class="hint">Signing in syncs your classes, students, grades, subjects, remarks and staff across every device you log into. Photos, signatures, and the school logo stay local to each device. Guest mode keeps everything on this device only.</p>
   </div>
 </div>
 
@@ -166,6 +169,12 @@
     <div class="backup-section">
       <h3 class="subsection-title">PIN Lock</h3>
       <div id="pinStatusWrap"></div>
+    </div>
+
+    <div class="backup-section">
+      <h3 class="subsection-title">Cloud Sync</h3>
+      <div id="cloudSyncStatus"></div>
+      <button id="syncNowBtn" class="btn-primary hidden">Sync Now</button>
     </div>
   </section>
 
@@ -339,6 +348,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js"></script>
-<script src="app-29.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js"></script>
+<script src="app-30.js"></script>
 </body>
 </html>

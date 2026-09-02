@@ -1,12 +1,12 @@
 // AlatiphA Report Cards — service worker
-// Keep CACHE_NAME's version in sync with APP_VERSION in app-29.js
-const CACHE_NAME = 'arc-cache-v32';
+// Keep CACHE_NAME's version in sync with APP_VERSION in app-30.js
+const CACHE_NAME = 'arc-cache-v33';
 
 const APP_SHELL = [
   './',
   './index.html',
   './style-18.css',
-  './app-29.js',
+  './app-30.js',
   './firebase-config.js',
   './manifest.json',
   './icon.svg',
@@ -18,6 +18,7 @@ const APP_SHELL = [
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
   'https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js',
+  'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore-compat.js',
   'https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap'
 ];
 
