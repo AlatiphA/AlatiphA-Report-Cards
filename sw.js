@@ -1,12 +1,13 @@
 // AlatiphA Report Cards — service worker
-// Keep CACHE_NAME's version in sync with APP_VERSION in app-26.js
-const CACHE_NAME = 'arc-cache-v28';
+// Keep CACHE_NAME's version in sync with APP_VERSION in app-27.js
+const CACHE_NAME = 'arc-cache-v29';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './style-16.css',
-  './app-26.js',
+  './style-17.css',
+  './app-27.js',
+  './firebase-config.js',
   './manifest.json',
   './icon.svg',
   './icon-192.png',
@@ -15,6 +16,8 @@ const APP_SHELL = [
   './apple-touch-icon.png',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+  'https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js',
   'https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap'
 ];
 

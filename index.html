@@ -12,18 +12,37 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Report Cards">
-<link rel="stylesheet" href="style-16.css">
+<link rel="stylesheet" href="style-17.css">
+<script src="firebase-config.js"></script>
 <script>
   (function () {
     try {
       var t = localStorage.getItem('arc_theme');
       if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
       if (localStorage.getItem('arc_pin_hash')) document.documentElement.classList.add('locked');
+      if (window.FIREBASE_CONFIG && window.FIREBASE_CONFIG.apiKey && window.FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY') {
+        document.documentElement.classList.add('authing');
+      }
     } catch (e) {}
   })();
 </script>
 </head>
 <body>
+
+<div id="authGate">
+  <div class="lock-box">
+    <img src="icon.svg" alt="" class="lock-seal">
+    <h2 id="authHeading">Teacher Sign In</h2>
+    <input type="email" id="authEmail" placeholder="Email" autocomplete="email">
+    <input type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+    <button id="authSubmitBtn" class="btn-primary">Log In</button>
+    <button type="button" id="authToggleModeBtn" class="btn-text">Need an account? Sign up</button>
+    <button type="button" id="authForgotBtn" class="btn-text">Forgot password?</button>
+    <button type="button" id="authGuestBtn" class="btn-text">Continue without an account</button>
+    <p id="authError" class="lock-error hidden"></p>
+    <p class="hint">Creating an account currently keeps your data separate from other teachers using this device. Multi-device cloud sync is coming in a future update.</p>
+  </div>
+</div>
 
 <div id="lockOverlay">
   <div class="lock-box">
@@ -55,7 +74,9 @@
       <div id="profileDropdown" class="profile-dropdown hidden">
         <div id="profileSchoolName" class="profile-school-name">—</div>
         <div id="profileTermYear" class="profile-term-year">—</div>
+        <div id="profileAccountLine" class="profile-account-line">—</div>
         <button type="button" id="profileSetupLink" class="profile-link">Go to Setup</button>
+        <button type="button" id="logoutBtn" class="profile-link profile-link-danger hidden">Log Out</button>
       </div>
     </div>
   </div>
@@ -310,6 +331,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="app-26.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js"></script>
+<script src="app-27.js"></script>
 </body>
 </html>
