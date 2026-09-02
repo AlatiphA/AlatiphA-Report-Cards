@@ -40,7 +40,7 @@
     <button type="button" id="authForgotBtn" class="btn-text">Forgot password?</button>
     <button type="button" id="authGuestBtn" class="btn-text">Continue without an account</button>
     <p id="authError" class="lock-error hidden"></p>
-    <p class="hint">Creating an account currently keeps your data separate from other teachers using this device. Multi-device cloud sync is coming in a future update.</p>
+    <p class="hint">Creating an account keeps your data separate going forward from other teachers (or guest mode) on this device — but it starts as a copy of whatever's already here, so it won't look different right away. Multi-device cloud sync is coming in a future update. You can switch back to "Continue without an account" any time from the profile menu (top right).</p>
   </div>
 </div>
 
@@ -76,6 +76,7 @@
         <div id="profileTermYear" class="profile-term-year">—</div>
         <div id="profileAccountLine" class="profile-account-line">—</div>
         <button type="button" id="profileSetupLink" class="profile-link">Go to Setup</button>
+        <button type="button" id="profileLoginBtn" class="profile-link hidden">Log In</button>
         <button type="button" id="logoutBtn" class="profile-link profile-link-danger hidden">Log Out</button>
       </div>
     </div>
@@ -333,6 +334,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.17.1/firebase-auth-compat.js"></script>
-<script src="app-27.js"></script>
+<script src="app-28.js"></script>
 </body>
 </html>
