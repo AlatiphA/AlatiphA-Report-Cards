@@ -1,11 +1,11 @@
 // AlatiphA Report Cards — service worker
 // Keep CACHE_NAME's version in sync with APP_VERSION in app-30.js
-const CACHE_NAME = 'arc-cache-v33';
+const CACHE_NAME = 'arc-cache-v34';
 
 const APP_SHELL = [
   './',
   './index.html',
-  './style-18.css',
+  './style-19.css',
   './app-30.js',
   './firebase-config.js',
   './manifest.json',
